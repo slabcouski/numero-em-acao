@@ -102,7 +102,7 @@ const registerUser = async () => {
     }
 
     try {
-        const apiUrl = 'http://localhost:3000/api/register';
+        const apiUrl = '/api/register';
         
         console.log('Enviando requisição para:', apiUrl);
         

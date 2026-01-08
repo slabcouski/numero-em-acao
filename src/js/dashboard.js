@@ -48,7 +48,7 @@ async function saveProgress() {
     try {
         const userId = localStorage.getItem('userId');
         if (userId) {
-            await fetch('http://localhost:3000/api/save-game-progress', {
+            await fetch('/api/save-game-progress', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ async function loadProgress() {
         const userId = localStorage.getItem('userId');
         if (userId) {
             // Tentar carregar do servidor primeiro
-            const response = await fetch(`http://localhost:3000/api/get-game-progress?userId=${userId}`);
+            const response = await fetch(`/api/get-game-progress?userId=${userId}`);
             if (response.ok) {
                 const progress = await response.json();
                 gameState.level = progress.level || 1;
@@ -212,7 +212,7 @@ async function logExerciseIfPossible() {
             factor2: gameState.currentExercise.factor2,
             correctAnswer: gameState.currentExercise.correctAnswer
         };
-        const resp = await fetch('http://localhost:3000/api/log-exercise', {
+        const resp = await fetch('/api/log-exercise', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -355,7 +355,7 @@ async function logAnswerIfPossible(isCorrect) {
         if (!exercicioId) return;
         const tempo = gameState.currentExercise?.startTime ? (Date.now() - gameState.currentExercise.startTime) : null;
         const pontos = isCorrect ? (10 * gameState.level) : 0;
-        const resp = await fetch('http://localhost:3000/api/log-answer', {
+        const resp = await fetch('/api/log-answer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

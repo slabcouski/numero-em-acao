@@ -36,7 +36,7 @@ export async function saveUserToDatabase() {
         const username = user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
 
         // Salvar dados na tabela 'users' usando service role key
-        const response = await fetch('http://localhost:3000/api/save-google-user', {
+        const response = await fetch('/api/save-google-user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
