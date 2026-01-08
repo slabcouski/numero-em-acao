@@ -3,7 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
-import loginRouter from '../src/api/login.js';
 
 dotenv.config();
 
@@ -33,8 +32,164 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
 });
 
-// Login routes
-app.use('/api', loginRouter);
+// ========== ROTAS DE LOGIN ==========
+
+// Rota de login
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Usuário e senha são obrigatórios' });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .or(`email.eq.${username},username.eq.${username}`)
+            .single();
+
+        if (error || !data) {
+            return res.status(401).json({ error: 'Usuário ou senha incorretos' });
+        }
+
+        // Validar senha
+        if (!data.password_hash) {
+            return res.status(401).json({ error: 'Esta conta está vinculada ao Google. Entre usando "Entrar com Google".' });
+        }
+
+        if (data.password_hash !== password) {
+            return res.status(401).json({ error: 'Usuário ou senha incorretos' });
+        }
+
+        res.json({
+            user: {
+                id: data.id,
+                email: data.email,
+                username: data.username,
+                avatar_url: data.avatar_url
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        res.status(500).json({ error: 'Erro ao fazer login' });
+    }
+});
+
+// Rota de registro
+app.post('/api/register', async (req, res) => {
+    const { name, email, passwordHash } = req.body;
+
+    if (!name || !email || !passwordHash) {
+        return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+    }
+
+    if (name.length < 3) {
+        return res.status(400).json({ error: 'Nome deve ter no mínimo 3 caracteres' });
+    }
+
+    try {
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .single();
+
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email já cadastrado' });
+        }
+
+        const { data, error } = await supabase
+            .from('users')
+            .insert({
+                username: name,
+                email: email,
+                password_hash: passwordHash,
+                auth_provider: 'local'
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Erro ao criar usuário:', error);
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({
+            user: {
+                id: data.id,
+                email: data.email,
+                username: data.username
+            }
+        });
+    } catch (error) {
+        console.error('Erro no servidor:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rota de salvar usuário Google
+app.post('/api/save-google-user', async (req, res) => {
+    const { id, email, username, avatar_url } = req.body;
+
+    if (!id || !email) {
+        return res.status(400).json({ error: 'ID e email são obrigatórios' });
+    }
+
+    try {
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        if (existingUser) {
+            const { data, error } = await supabase
+                .from('users')
+                .update({
+                    email,
+                    username: username || existingUser.username,
+                    avatar_url,
+                    auth_provider: 'google',
+                    password_hash: null
+                })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) {
+                return res.status(400).json({ error: error.message });
+            }
+
+            return res.json({ user: data });
+        }
+
+        const { data, error } = await supabase
+            .from('users')
+            .insert({
+                id,
+                email,
+                username: username || email.split('@')[0],
+                avatar_url,
+                auth_provider: 'google',
+                password_hash: null
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Erro ao criar usuário Google:', error);
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({ user: data });
+    } catch (error) {
+        console.error('Erro no servidor:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========== ROTAS DE JOGO ==========
 
 // Rota de health check
 app.get('/api/health', (req, res) => {
