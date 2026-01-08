@@ -3,8 +3,8 @@
 README.md
 LICENSE
 LICENSE.pt-BR
-node_modules
-npm-debug.log
 .env.local
 .vscode
 .idea
+src/api/server.js
+
