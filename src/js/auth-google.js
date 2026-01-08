@@ -3,10 +3,15 @@ import { supabase } from '../config/supabase-config.js';
 
 export async function loginWithGoogle() {
     try {
+        // Detecta se está em localhost ou produção
+        const redirectUrl = window.location.hostname === 'localhost' 
+            ? window.location.origin + '/projetos/Calcular/index.html'
+            : window.location.origin + '/index.html';
+        
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + '/projetos/Calcular/index.html',
+                redirectTo: redirectUrl,
             },
         });
 
