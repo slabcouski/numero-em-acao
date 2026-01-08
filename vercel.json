@@ -7,8 +7,7 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "maxLambdaSize": "50mb",
-        "nodeVersion": "18.x"
+        "maxLambdaSize": "50mb"
       }
     }
   ],
