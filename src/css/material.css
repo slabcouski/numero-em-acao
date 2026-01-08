@@ -1,0 +1,7 @@
+.material-symbols-outlined {
+    font-variation-settings: 'FILL'1, 'wght'600, 'GRAD'0, 'opsz'40
+}
+
+.spine-stitch {
+    background-image: repeating-linear-gradient(180deg, transparent, transparent 14px, rgba(0, 0, 0, 0.1) 14px, rgba(0, 0, 0, 0.1) 16px, transparent 16px);
+}

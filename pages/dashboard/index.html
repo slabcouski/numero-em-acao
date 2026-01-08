@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="stylesheet" href="../../src/css/output.css" />
+    <link rel="stylesheet" href="../../src/css/material.css" />
+    <link rel="stylesheet" href="../../src/css/dashboard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <title>Jogo Matemático Inclusivo Digital: 'Numero em Ação'</title>
+</head>
+
+<body
+    class="text-ink dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden">
+    <nav class="w-full px-4 pt-4 flex justify-center z-30 sticky top-0 pointer-events-none">
+        <div
+            class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md px-6 py-3 rounded-full shadow-float border-4 border-white dark:border-gray-700 flex flex-col md:flex-row gap-4 items-center pointer-events-auto max-w-5xl w-full justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-toy-yellow text-white p-2 rounded-full shadow-sm shrink-0 border-2 border-white">
+                    <span class="material-icons-round text-2xl">auto_stories</span>
+                </div>
+                <h1 class="text-lg md:text-xl font-black tracking-tight text-primary dark:text-white leading-tight">
+                    Numero em Ação
+                </h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex bg-toy-blue/10 px-4 py-1.5 rounded-full items-center gap-2">
+                    <span class="material-symbols-outlined text-toy-blue text-sm animate-spin-slow">star</span>
+                    <span class="text-sm font-bold text-toy-blue">Nível: Iniciante</span>
+                </div>
+                <button
+                    class="flex items-center gap-2 bg-toy-green text-white px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform shadow-sticker border-b-4 border-green-600 active:border-b-0 active:translate-y-1">
+                    <span class="material-icons-round text-sm">bookmark</span>
+                    Capítulo 1
+                </button>
+                <button aria-label="Alternar modo escuro"
+                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-400 dark:text-gray-300"
+                    onclick="document.documentElement.classList.toggle('dark')">
+                    <span class="material-icons-round">brightness_4</span>
+                </button>
+                <button aria-label="Deslogar"
+                    class="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-gray-400 dark:text-gray-300 hover:text-toy-red"
+                    onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <main class="flex-grow flex items-center justify-center p-4 lg:p-8 w-full z-10">
+        <div
+            class="relative w-full max-w-6xl flex flex-col lg:flex-row shadow-book-outer rounded-3xl bg-cover dark:bg-gray-900 border-[12px] border-cover dark:border-gray-800 overflow-hidden transform transition-all hover:scale-[1.005]">
+            <div class="absolute top-0 bottom-0 left-0 w-4 bg-black/10 z-20 pointer-events-none"></div>
+            <div class="absolute top-0 bottom-0 right-0 w-4 bg-black/10 z-20 pointer-events-none"></div>
+            <div
+                class="flex-1 bg-paper dark:bg-paper-dark p-6 lg:p-12 relative flex flex-col gap-8 bg-doodle-pattern rounded-l-2xl lg:rounded-l-none lg:rounded-bl-2xl">
+                <div
+                    class="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-toy-yellow/20 to-transparent rounded-br-full pointer-events-none">
+                </div>
+                <div class="absolute top-4 left-4 text-toy-yellow animate-[spin_12s_linear_infinite]">
+                    <span class="material-symbols-outlined text-5xl opacity-20">sunny</span>
+                </div>
+                <header
+                    class="flex items-center justify-between border-b-4 border-dashed border-primary/20 pb-4 relative z-10">
+                    <div class="flex flex-col">
+                        <span
+                            class="text-xs font-black uppercase tracking-wider text-toy-blue mb-1 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">rocket_launch</span>
+                            Vamos Aprender
+                        </span>
+                        <h2 class="text-3xl font-black text-primary flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined text-4xl text-toy-yellow floating-element">verified</span>
+                            Exercício 1
+                        </h2>
+                    </div>
+                    <div
+                        class="rotate-2 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 px-3 py-2 rounded-lg text-center transform hover:rotate-0 transition-transform cursor-default relative">
+                        <div class="absolute -top-2 -right-2 text-toy-red transform rotate-12">
+                            <span class="material-icons-round text-xl">favorite</span>
+                        </div>
+                        <span class="block text-xs font-bold text-gray-400 uppercase">Pág.</span>
+                        <span class="text-xl font-black text-ink dark:text-white" id="page-number">1</span>
+                    </div>
+                </header>
+                <div
+                    class="bg-white/80 dark:bg-black/20 p-6 rounded-3xl shadow-sm border-4 border-toy-blue/20 backdrop-blur-sm relative">
+                    <div
+                        class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-toy-red shadow-md border-2 border-white z-10">
+                    </div>
+                    <div class="text-center mb-4">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Sua Missão</h3>
+                    </div>
+                    <div class="flex items-center justify-center gap-4 mb-6">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-inner border-2 border-gray-100 dark:border-gray-600 flex items-center gap-4 sticker-number relative overflow-hidden">
+                            <div class="absolute -bottom-4 -left-4 w-12 h-12 bg-toy-blue/5 rounded-full z-0"></div>
+                            <div class="bg-toy-blue/10 text-toy-blue px-4 py-2 rounded-xl text-5xl font-black relative z-10"
+                                id="factor-a">4</div>
+                            <div class="text-gray-300 text-3xl font-black relative z-10">×</div>
+                            <div class="bg-toy-yellow/10 text-toy-yellow px-4 py-2 rounded-xl text-5xl font-black relative z-10"
+                                id="factor-b">3</div>
+                        </div>
+                        <div class="text-4xl font-black text-gray-300">=</div>
+                        <div
+                            class="bg-primary/10 p-4 rounded-2xl text-center border-4 border-dashed border-primary/40 min-w-[100px] flex items-center justify-center relative overflow-hidden group hover:bg-primary/20 transition-colors cursor-pointer">
+                            <span class="text-5xl font-black text-primary sticker-number" id="result-display">12</span>
+                            <div
+                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-icons-round text-primary/30 text-6xl">edit</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <button
+                            class="flex items-center justify-center gap-2 py-4 px-6 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-2xl font-bold text-gray-500 dark:text-gray-300 transition-all active:scale-95 shadow-sticker border-b-4 border-gray-300 dark:border-gray-900 active:border-b-0 active:translate-y-1"
+                            onclick="resetExercise()">
+                            <span class="material-icons-round">refresh</span>
+                            Tentar de novo
+                        </button>
+                        <button
+                            class="flex items-center justify-center gap-2 py-4 px-6 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-lg shadow-sticker border-b-4 border-violet-800 active:border-b-0 active:translate-y-1 transition-all active:scale-95 group"
+                            onclick="checkAnswer()">
+                            <span>Confirmar</span>
+                            <span
+                                class="material-icons-round group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-auto flex items-end gap-6 relative">
+                    <div class="relative w-64 shrink-0 z-10 group cursor-pointer">
+                        <div
+                            class="bg-white dark:bg-gray-700 text-ink dark:text-white p-3 rounded-2xl rounded-bl-none shadow-lg border-2 border-toy-blue/20 transform rotate-2 hover:rotate-0 transition-transform origin-bottom-left absolute left-32 top-0 z-20">
+                            <p class="text-xs font-bold whitespace-nowrap flex items-center gap-1">
+                                <span class="material-icons-round text-toy-yellow text-sm">lightbulb</span>
+                                "Você consegue!"
+                            </p>
+                        </div>
+                        <svg class="w-40 h-40 drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500 origin-bottom floating-element"
+                            fill="none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 110C20 110 10 130 20 150C30 170 60 160 60 140" fill="#7dd3fc"></path>
+                            <path d="M160 110C180 110 190 130 180 150C170 170 140 160 140 140" fill="#7dd3fc"></path>
+                            <rect fill="#0ea5e9" height="100" rx="50" width="100" x="50" y="80"></rect>
+                            <ellipse cx="100" cy="140" fill="#e0f2fe" rx="35" ry="30"></ellipse>
+                            <g>
+                                <circle cx="75" cy="90" fill="white" r="22"></circle>
+                                <circle cx="125" cy="90" fill="white" r="22"></circle>
+                                <circle cx="75" cy="90" fill="#334155" r="8"></circle>
+                                <circle cx="125" cy="90" fill="#334155" r="8"></circle>
+                                <circle cx="77" cy="88" fill="white" r="3"></circle>
+                                <circle cx="127" cy="88" fill="white" r="3"></circle>
+                            </g>
+                            <path d="M90 110L100 125L110 110H90Z" fill="#fbbf24"></path>
+                            <path d="M80 175L75 185H85Z" fill="#fbbf24"></path>
+                            <path d="M120 175L115 185H125Z" fill="#fbbf24"></path>
+                            <g class="opacity-90">
+                                <circle cx="75" cy="90" r="22" stroke="#1e293b" stroke-width="3"></circle>
+                                <circle cx="125" cy="90" r="22" stroke="#1e293b" stroke-width="3"></circle>
+                                <line stroke="#1e293b" stroke-width="3" x1="97" x2="103" y1="90" y2="90"></line>
+                            </g>
+                            <path d="M60 60 L100 40 L140 60 L100 80 Z" fill="#334155"></path>
+                            <rect fill="#fcd34d" height="25" transform="rotate(20 100 50)" width="4" x="98" y="38"></rect>
+                        </svg>
+                    </div>
+                    <div
+                        class="bg-yellow-50 dark:bg-yellow-900/10 p-5 rounded-3xl rounded-bl-none border-2 border-yellow-100 dark:border-yellow-900/30 flex-grow relative self-center">
+                        <span
+                            class="absolute -top-3 left-4 bg-toy-yellow text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wide shadow-sm">Dica</span>
+                        <p class="text-sm font-bold text-gray-600 dark:text-gray-300 mt-1">Gire o círculo azul para
+                            escolher o primeiro número!</p>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="hidden lg:block w-12 bg-[#F8FAFC] dark:bg-gray-800 relative z-20 book-spine-gradient border-l border-r border-black/5 dark:border-white/5">
+                <div
+                    class="absolute top-10 left-1/2 transform -translate-x-1/2 w-[2px] h-[90%] border-l-2 border-dashed border-gray-300 dark:border-gray-600">
+                </div>
+            </div>
+            <div
+                class="flex-1 bg-paper dark:bg-paper-dark p-6 lg:p-10 relative flex flex-col items-center justify-center bg-doodle-pattern rounded-r-2xl lg:rounded-r-none lg:rounded-br-2xl min-h-[600px] overflow-hidden">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-toy-blue/10 to-transparent rounded-bl-full pointer-events-none">
+                </div>
+                <div class="absolute top-6 right-8 text-sm font-bold text-gray-300 flex items-center gap-1">
+                    <span id="page-number-right">Página 5</span>
+                    <span class="material-icons-round text-gray-200">cloud</span>
+                </div>
+                <section class="relative w-full max-w-[450px] aspect-square flex items-center justify-center p-4">
+                    <div
+                        class="absolute inset-0 bg-toy-blue/5 dark:bg-toy-blue/10 blob-shape animate-[spin_10s_linear_infinite] opacity-50 z-0">
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-secondary/5 dark:bg-secondary/10 blob-shape animate-[spin_15s_linear_infinite_reverse] opacity-50 z-0 scale-90">
+                    </div>
+                    <div class="relative w-full h-full flex items-center justify-center z-10">
+                        <div class="absolute w-[98%] h-[98%] rounded-full bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center border-8 border-toy-blue ring-transition cursor-grab active:cursor-grabbing"
+                            id="ring-outer">
+                            <div
+                                class="absolute w-[92%] h-[92%] rounded-full border-2 border-dashed border-toy-blue/30 opacity-70 pointer-events-none">
+                            </div>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 8%; left: 50%; transform: translate(-50%, -50%);">12</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 14%; left: 72%; transform: translate(-50%, -50%) rotate(30deg);">1</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 29%; left: 86%; transform: translate(-50%, -50%) rotate(60deg);">2</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 50%; left: 92%; transform: translate(-50%, -50%) rotate(90deg);">3</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 71%; left: 86%; transform: translate(-50%, -50%) rotate(120deg);">4</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 86%; left: 72%; transform: translate(-50%, -50%) rotate(150deg);">5</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 92%; left: 50%; transform: translate(-50%, -50%) rotate(180deg);">6</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 86%; left: 28%; transform: translate(-50%, -50%) rotate(210deg);">7</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 71%; left: 14%; transform: translate(-50%, -50%) rotate(240deg);">8</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 50%; left: 8%; transform: translate(-50%, -50%) rotate(270deg);">9</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 29%; left: 14%; transform: translate(-50%, -50%) rotate(300deg);">10</span>
+                            <span class="absolute text-2xl font-black text-toy-blue select-none pointer-events-none"
+                                style="top: 14%; left: 28%; transform: translate(-50%, -50%) rotate(330deg);">11</span>
+                            <div
+                                class="absolute -top-8 bg-toy-blue text-white px-4 py-1 rounded-full text-sm font-black shadow-sm border-2 border-white transform -rotate-3">
+                                1º Fator</div>
+                        </div>
+                        <div class="absolute w-[68%] h-[68%] rounded-full bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center border-[6px] border-toy-green ring-transition cursor-grab active:cursor-grabbing z-20"
+                            id="ring-middle">
+                            <span
+                                class="absolute top-4 text-4xl font-black text-toy-green select-none material-icons-round">close</span>
+                            <span
+                                class="absolute bottom-4 text-4xl font-black text-toy-green select-none material-icons-round">add</span>
+                            <span
+                                class="absolute left-4 text-4xl font-black text-toy-green select-none material-icons-round">remove</span>
+                            <svg class="absolute right-3 w-8 h-8 text-toy-green select-none pointer-events-none" viewBox="0 0 24 24" aria-label="divisão">
+                                <circle cx="12" cy="6" r="2" fill="currentColor" />
+                                <rect x="5" y="11" width="14" height="2" rx="1" fill="currentColor" />
+                                <circle cx="12" cy="18" r="2" fill="currentColor" />
+                            </svg>
+                            <div
+                                class="absolute w-[80%] h-[80%] border-2 border-dotted border-toy-green/30 rounded-full">
+                            </div>
+                        </div>
+                        <div class="absolute w-[42%] h-[42%] rounded-full bg-white dark:bg-gray-800 shadow-2xl flex items-center justify-center border-[6px] border-toy-yellow ring-transition cursor-grab active:cursor-grabbing z-30"
+                            id="ring-inner">
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 10%; left: 50%; transform: translate(-50%, -50%);">12</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 15%; left: 72%; transform: translate(-50%, -50%) rotate(30deg);">1</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 30%; left: 86%; transform: translate(-50%, -50%) rotate(60deg);">2</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 50%; left: 90%; transform: translate(-50%, -50%) rotate(90deg);">3</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 70%; left: 86%; transform: translate(-50%, -50%) rotate(120deg);">4</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 85%; left: 72%; transform: translate(-50%, -50%) rotate(150deg);">5</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 90%; left: 50%; transform: translate(-50%, -50%) rotate(180deg);">6</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 85%; left: 28%; transform: translate(-50%, -50%) rotate(210deg);">7</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 70%; left: 14%; transform: translate(-50%, -50%) rotate(240deg);">8</span>
+                            <span class="absolute text-xl font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 50%; left: 10%; transform: translate(-50%, -50%) rotate(270deg);">9</span>
+                            <span class="absolute text-lg font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 30%; left: 14%; transform: translate(-50%, -50%) rotate(300deg);">10</span>
+                            <span class="absolute text-lg font-black text-toy-yellow select-none pointer-events-none"
+                                style="top: 15%; left: 28%; transform: translate(-50%, -50%) rotate(330deg);">11</span>
+                            <div
+                                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center z-40 shadow-inner border border-gray-200 dark:border-gray-600">
+                                <div class="w-4 h-4 bg-primary rounded-full"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-4 w-2 h-24 bg-gradient-to-b from-toy-red/50 to-transparent z-40 pointer-events-none rounded-full blur-[1px]">
+                        </div>
+                        <div class="absolute -top-8 text-toy-red animate-bounce z-50 filter drop-shadow-md">
+                            <span class="material-icons-round text-5xl"
+                                style="text-shadow: 0px 2px 0px white;">arrow_drop_down</span>
+                        </div>
+                    </div>
+                </section>
+                <div class="absolute bottom-6 flex gap-6 justify-center w-full z-20">
+                    <button
+                        class="bg-white dark:bg-gray-700 p-3 rounded-2xl shadow-sticker text-toy-blue hover:scale-110 transition-all border-b-4 border-toy-blue active:border-b-0 active:translate-y-1"
+                        onclick="rotateRing('ring-outer')" title="Girar anel externo">
+                        <span class="material-icons-round text-3xl">autorenew</span>
+                    </button>
+                    <button
+                        class="bg-white dark:bg-gray-700 p-3 rounded-2xl shadow-sticker text-toy-green hover:scale-110 transition-all border-b-4 border-toy-green active:border-b-0 active:translate-y-1"
+                        onclick="rotateRing('ring-middle')" title="Girar anel do meio">
+                        <span class="material-icons-round text-3xl">sync</span>
+                    </button>
+                    <button
+                        class="bg-white dark:bg-gray-700 p-3 rounded-2xl shadow-sticker text-toy-yellow hover:scale-110 transition-all border-b-4 border-toy-yellow active:border-b-0 active:translate-y-1"
+                        onclick="rotateRing('ring-inner')" title="Girar anel interno">
+                        <span class="material-icons-round text-3xl">loop</span>
+                    </button>
+                </div>
+                <div
+                    class="absolute bottom-4 right-10 z-10 hidden lg:block pointer-events-none animate-wiggle origin-bottom">
+                    <div class="relative w-24 h-24">
+                        <div
+                            class="absolute bottom-0 right-0 w-16 h-16 bg-toy-green rounded-full border-4 border-white dark:border-gray-700 shadow-md flex items-center justify-center z-20">
+                            <div class="flex flex-col items-center">
+                                <div class="flex gap-1 mb-1 relative">
+                                    <div
+                                        class="absolute w-[110%] h-[2px] bg-black/30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                    </div>
+                                    <div
+                                        class="w-5 h-5 bg-white rounded-full border-2 border-black/50 flex items-center justify-center z-10 relative">
+                                        <div class="w-1.5 h-1.5 bg-black rounded-full"></div>
+                                    </div>
+                                    <div
+                                        class="w-5 h-5 bg-white rounded-full border-2 border-black/50 flex items-center justify-center z-10 relative">
+                                        <div class="w-1.5 h-1.5 bg-black rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="w-3 h-1.5 border-b-2 border-black/50 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="w-12 h-12 bg-toy-green/90 rounded-full border-4 border-white dark:border-gray-700 shadow-sm absolute right-12 bottom-0 z-10">
+                        </div>
+                        <div
+                            class="w-10 h-10 bg-toy-green/80 rounded-full border-4 border-white dark:border-gray-700 shadow-sm absolute right-20 bottom-1 z-0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="text-center p-6 text-gray-400 dark:text-gray-500 text-sm font-bold relative z-10">
+        <div
+            class="inline-flex items-center gap-2 bg-white/50 dark:bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
+            <span class="material-icons-round text-base text-toy-red">favorite</span>
+            <p>Desenvolvido com carinho para aprendizado inclusivo.</p>
+        </div>
+    </footer>
+    <script type="module" src="../../src/js/dashboard.js"></script>
+</body>
+
+</html>
