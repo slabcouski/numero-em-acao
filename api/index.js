@@ -186,33 +186,14 @@ app.post('/api/log-answer', async (req, res) => {
     }
 });
 
-// Rotas estáticas (servir arquivos HTML)
-app.get('/', (req, res) => {
-    res.sendFile(new URL('../index.html', import.meta.url).pathname);
-});
-
-app.get('/pages/cadastro/', (req, res) => {
-    res.sendFile(new URL('../pages/cadastro/index.html', import.meta.url).pathname);
-});
-
-app.get('/pages/dashboard/', (req, res) => {
-    res.sendFile(new URL('../pages/dashboard/index.html', import.meta.url).pathname);
-});
-
-// Middleware para servir arquivos estáticos
-app.use(express.static(new URL('../', import.meta.url).pathname));
+// Rotas estáticas (servir arquivos HTML) - Vercel serve automaticamente
+// As requisições para / irão para index.html
+// As requisições para /pages/cadastro/ irão para pages/cadastro/index.html
+// As requisições para /pages/dashboard/ irão para pages/dashboard/index.html
 
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });
 });
-
-// Iniciar servidor apenas se não estiver no Vercel
-if (!process.env.VERCEL) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
-    });
-}
 
 export default app;
