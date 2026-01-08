@@ -106,6 +106,9 @@ const registerUser = async () => {
         
         console.log('Enviando requisição para:', apiUrl);
         
+        // Hash da senha usando btoa (base64) - mesmo método do login
+        const passwordHash = btoa(password);
+        
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -114,8 +117,7 @@ const registerUser = async () => {
             body: JSON.stringify({
                 name,
                 email,
-                password,
-                passwordConfirm
+                passwordHash
             })
         });
 
