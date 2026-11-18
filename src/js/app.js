@@ -35,8 +35,9 @@ const showToast = (type, message) => {
     toast.className = `${base} ${variants[type] || variants.info}`;
     toast.innerHTML = `
         <span class="material-symbols-outlined text-xl pt-0.5 flex-shrink-0">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
-        <span class="leading-5 flex-1 text-gray-900">${message}</span>
+        <span class="leading-5 flex-1 text-gray-900"></span>
     `;
+    toast.lastElementChild.textContent = message;
 
     container.appendChild(toast);
 
@@ -106,9 +107,6 @@ const registerUser = async () => {
         
         console.log('Enviando requisição para:', apiUrl);
         
-        // Hash da senha usando btoa (base64) - mesmo método do login
-        const passwordHash = btoa(password);
-        
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -117,7 +115,8 @@ const registerUser = async () => {
             body: JSON.stringify({
                 name,
                 email,
-                passwordHash
+                password,
+                passwordConfirm
             })
         });
 
@@ -125,18 +124,15 @@ const registerUser = async () => {
         
         const result = await response.json();
         
-        console.log('Resultado da API:', result);
-
         if (!response.ok) {
             showToast('error', 'Erro ao registrar: ' + (result.error || 'Tente novamente'));
             return false;
         }
 
         // Armazenar dados do usuário localmente
-        if (result.passwordHash) {
-            localStorage.setItem('passwordHash', result.passwordHash);
-        }
+        localStorage.removeItem('passwordHash');
         if (result.user) {
+            if (localStorage.getItem('userId') !== result.user.id) localStorage.removeItem('gameProgress');
             localStorage.setItem('userId', result.user.id);
             localStorage.setItem('username', result.user.username);
             localStorage.setItem('email', result.user.email);
@@ -187,6 +183,11 @@ const attachHandlers = () => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await checkAuthStatus();
+    try {
+        if (await checkAuthStatus()) return;
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        showToast('error', 'Não foi possível verificar a sessão.');
+    }
     attachHandlers();
 });

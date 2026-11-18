@@ -48,7 +48,7 @@ async function saveProgress() {
     try {
         const userId = localStorage.getItem('userId');
         if (userId) {
-            await fetch('/api/save-game-progress', {
+            const response = await fetch('/api/save-game-progress', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,6 +58,7 @@ async function saveProgress() {
                     ...progress
                 })
             });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
         }
     } catch (error) {
         console.error('Erro ao salvar progresso no servidor:', error);
@@ -220,6 +221,8 @@ async function logExerciseIfPossible() {
         if (resp.ok) {
             const data = await resp.json();
             gameState.currentExercise.exercicioId = data.exercicioId || null;
+        } else {
+            console.error('Falha ao registrar exercício:', resp.status);
         }
     } catch(e) {
         console.error('Erro ao registrar exercício:', e);
@@ -518,7 +521,15 @@ async function showGameComplete() {
 }
 
 // --- FUNÇÃO DE LOGOUT ---
-function logout() {
+async function logout() {
+    try {
+        const response = await fetch('/api/logout', { method: 'POST' });
+        if (!response.ok && response.status !== 401) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+        console.error('Erro ao sair:', error);
+        showToast('Não foi possível sair. Tente novamente.', 'error');
+        return;
+    }
     // Remover TODOS os dados de autenticação e progresso
     localStorage.clear();
     sessionStorage.clear();
@@ -529,6 +540,24 @@ function logout() {
 
 // --- INICIALIZAÇÃO ---
 async function initGame() {
+    try {
+        const response = await fetch('/api/session');
+        if (response.status === 401) {
+            window.location.href = '../../index.html';
+            return;
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const { user } = await response.json();
+        if (localStorage.getItem('userId') !== user.id) localStorage.removeItem('gameProgress');
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('username', user.username || user.email);
+        localStorage.setItem('email', user.email);
+        localStorage.removeItem('passwordHash');
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        showToast('Não foi possível verificar a sessão. Atualize a página.', 'error');
+        return;
+    }
     await loadProgress();
     gameState.currentExercise = generateExercise(gameState.level);
     updateUI();

@@ -26,8 +26,9 @@ const showToast = (type, message) => {
     toast.className = `${base} ${variants[type] || variants.info}`;
     toast.innerHTML = `
         <span class="material-symbols-outlined text-xl pt-0.5 flex-shrink-0">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
-        <span class="leading-5 flex-1 text-gray-900">${message}</span>
+        <span class="leading-5 flex-1 text-gray-900"></span>
     `;
+    toast.lastElementChild.textContent = message;
 
     container.appendChild(toast);
 
@@ -82,9 +83,6 @@ const handleLogin = async (event) => {
     }
 
     try {
-        // Encode password in base64
-        const passwordHash = btoa(password);
-
         const response = await fetch('/api/login', {
             method: 'POST',
             headers: {
@@ -92,7 +90,7 @@ const handleLogin = async (event) => {
             },
             body: JSON.stringify({
                 username,
-                password: passwordHash
+                password
             })
         });
 
@@ -104,10 +102,11 @@ const handleLogin = async (event) => {
         }
 
         // Armazenar dados do usuário
+        if (localStorage.getItem('userId') !== data.user.id) localStorage.removeItem('gameProgress');
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('username', data.user.username || data.user.email);
         localStorage.setItem('email', data.user.email);
-        localStorage.setItem('passwordHash', passwordHash);
+        localStorage.removeItem('passwordHash');
 
         showToast('success', `Bem-vindo de volta, ${data.user.username || data.user.email}!`);
 
@@ -125,17 +124,12 @@ const handleLogin = async (event) => {
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Check if already logged in
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-        showToast('info', 'Você já está logado! Redirecionando...');
-        setTimeout(() => {
-            window.location.href = './pages/dashboard/index.html';
-        }, 1500);
-        return;
+    try {
+        if (await checkAuthStatus()) return;
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        showToast('error', 'Não foi possível verificar a sessão.');
     }
-
-    // Verificar se há sessão do Google (callback do OAuth)
-    await checkAuthStatus();
 
     const loginForm = document.querySelector('form');
     const googleLoginButton = document.getElementById('google-login-btn');

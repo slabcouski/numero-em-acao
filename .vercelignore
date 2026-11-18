@@ -7,4 +7,7 @@ LICENSE.pt-BR
 .vscode
 .idea
 src/api/server.js
+scripts
+*.crt
+*.pem
 
