@@ -15,6 +15,8 @@ O anel de operações permanece na posição escolhida pelo aluno ao trocar de e
 
 Os dois anéis numéricos vão de 1 a 12. Todos os números das missões respeitam esse limite; os resultados de soma e multiplicação podem ser maiores, pois são calculados a partir dos anéis. As divisões são sempre exatas.
 
+Os exercícios apresentados ficam registrados por aluno e nível, inclusive entre acessos e dispositivos. Eles só se repetem após esgotar as combinações do nível. Em adição e multiplicação, inverter a ordem dos números produz um exercício diferente.
+
 ### 📚 Estrutura de Aprendizado
 A plataforma tem **4 níveis de dificuldade** que progridem automaticamente:
 
@@ -57,5 +59,7 @@ O MySQL remoto deve permitir conexões da aplicação. Para TLS, configure `MYSQ
 Configure `APP_URL` com a origem pública da aplicação, sem caminho final. No cliente OAuth do Google, adicione `<APP_URL>/api/auth/google/callback` como URI de redirecionamento autorizada. Configure `APP_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e as variáveis `MYSQL_*` nas variáveis de ambiente da Vercel. Use uma URL estável para evitar quebrar o callback entre implantações.
 
 Para uma instalação nova, crie um banco MySQL vazio e execute o esquema em `src/api/schema.sql`. Não execute esse esquema em um banco existente sem verificar seu conteúdo. Execute `npm test` para verificar os testes automatizados.
+
+Em uma instalação existente, execute `src/api/migrations/001-exercise-history.sql` no banco MySQL antes de publicar a versão que usa o histórico. O registro começa após essa atualização: missões anteriores não são incluídas automaticamente.
 
 **Aprenda matemática se divertindo com Número em Ação!** 🚀🎯

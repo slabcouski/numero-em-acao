@@ -1,24 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { OPERATIONS, generateExercise, numberFromRotation, operationFromRotation, calculate, matchesExercise } from '../src/js/exercises.js';
+import { OPERATIONS, exercisesForLevel, numberFromRotation, operationFromRotation, calculate, matchesExercise } from '../src/js/exercises.js';
 
 test('todos os exercícios têm números representáveis e contas corretas', () => {
     for (let level = 1; level <= 4; level++) {
         const operation = Object.values(OPERATIONS).find(item => item.level === level);
-        for (let first = 0; first < 120; first++) {
-            for (let second = 0; second < 120; second++) {
-                const values = [first / 120, second / 120];
-                const exercise = generateExercise(level, () => values.shift());
-                assert.ok(exercise.factor1 >= 1 && exercise.factor1 <= 12);
-                assert.ok(exercise.factor2 >= 1 && exercise.factor2 <= 12);
-                assert.equal(exercise.operation, operation);
-                assert.equal(calculate(exercise.factor1, exercise.factor2, operation.symbol), exercise.correctAnswer);
-                if (level === 2) assert.ok(exercise.correctAnswer > 0);
-                if (level === 4) assert.equal(exercise.factor1 % exercise.factor2, 0);
-            }
+        const exercises = exercisesForLevel(level);
+        assert.ok(exercises.length >= 15);
+        assert.equal(new Set(exercises.map(item => `${item.factor1}:${item.factor2}`)).size, exercises.length);
+        for (const exercise of exercises) {
+            assert.ok(exercise.factor1 >= 1 && exercise.factor1 <= 12);
+            assert.ok(exercise.factor2 >= 1 && exercise.factor2 <= 12);
+            assert.equal(exercise.operation, operation);
+            assert.equal(calculate(exercise.factor1, exercise.factor2, operation.symbol), exercise.correctAnswer);
+            if (level === 2) assert.ok(exercise.correctAnswer > 0);
+            if (level === 4) assert.equal(exercise.factor1 % exercise.factor2, 0);
         }
     }
-    assert.throws(() => generateExercise(5), RangeError);
+    for (const level of [1, 3]) {
+        const pairs = new Set(exercisesForLevel(level).map(item => `${item.factor1}:${item.factor2}`));
+        assert.ok(pairs.has('2:3'));
+        assert.ok(pairs.has('3:2'));
+    }
+    assert.throws(() => exercisesForLevel(5), RangeError);
 });
 
 test('roletas representam os números e operações alinhados com o ponteiro', () => {

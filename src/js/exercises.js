@@ -5,45 +5,20 @@ export const OPERATIONS = {
     DIVISION: { symbol: '÷', name: 'Divisão', level: 4 }
 };
 
-const MAX_NUMBER = 12;
+export function exercisesForLevel(level) {
+    const operation = Object.values(OPERATIONS).find(item => item.level === level);
+    if (!operation) throw new RangeError('Nível de exercício inválido');
 
-function randomInt(min, max, random) {
-    return Math.floor(random() * (max - min + 1)) + min;
-}
-
-export function generateExercise(level, random = Math.random) {
-    let factor1, factor2, correctAnswer, operation;
-
-    switch (level) {
-        case 1:
-            operation = OPERATIONS.ADDITION;
-            factor1 = randomInt(1, MAX_NUMBER, random);
-            factor2 = randomInt(1, MAX_NUMBER, random);
-            correctAnswer = factor1 + factor2;
-            break;
-        case 2:
-            operation = OPERATIONS.SUBTRACTION;
-            factor1 = randomInt(2, MAX_NUMBER, random);
-            factor2 = randomInt(1, factor1 - 1, random);
-            correctAnswer = factor1 - factor2;
-            break;
-        case 3:
-            operation = OPERATIONS.MULTIPLICATION;
-            factor1 = randomInt(1, MAX_NUMBER, random);
-            factor2 = randomInt(1, MAX_NUMBER, random);
-            correctAnswer = factor1 * factor2;
-            break;
-        case 4:
-            operation = OPERATIONS.DIVISION;
-            factor2 = randomInt(2, MAX_NUMBER, random);
-            correctAnswer = randomInt(1, Math.floor(MAX_NUMBER / factor2), random);
-            factor1 = factor2 * correctAnswer;
-            break;
-        default:
-            throw new RangeError('Nível de exercício inválido');
+    const exercises = [];
+    for (let factor1 = 1; factor1 <= 12; factor1++) {
+        for (let factor2 = 1; factor2 <= 12; factor2++) {
+            const correctAnswer = calculate(factor1, factor2, operation.symbol);
+            if (level === 2 && correctAnswer <= 0) continue;
+            if (level === 4 && (factor2 < 2 || correctAnswer === null)) continue;
+            exercises.push({ factor1, factor2, correctAnswer, operation });
+        }
     }
-
-    return { factor1, factor2, correctAnswer, operation, userAnswer: null, exercicioId: null, startTime: null };
+    return exercises;
 }
 
 export function numberFromRotation(rotation) {

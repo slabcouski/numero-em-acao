@@ -3,6 +3,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { OAuth2Client } from 'google-auth-library';
 import { getPool } from './database.js';
 import { hashPassword, verifyPassword } from './password.js';
+import { exercisesForLevel } from '../js/exercises.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -211,6 +212,55 @@ app.post('/api/save-game-progress', requireSession, wrap(async (req, res) => {
     res.json({ success: true });
 }));
 
+app.post('/api/new-exercise', requireSession, wrap(async (req, res) => {
+    const { level } = req.body || {};
+    if (!Number.isSafeInteger(level) || level < 1 || level > 4) {
+        return res.status(400).json({ error: 'Nível inválido' });
+    }
+    const connection = await getPool().getConnection();
+    let exercise;
+    const exercicioId = randomUUID();
+    try {
+        await connection.beginTransaction();
+        await connection.execute('SELECT id FROM users WHERE id = ? FOR UPDATE', [req.user.id]);
+        const [cycles] = await connection.execute(
+            'SELECT MAX(cycle) AS cycle FROM exercise_history WHERE user_id = ? AND nivel = ?',
+            [req.user.id, level]
+        );
+        let cycle = cycles[0].cycle || 1;
+        const [history] = await connection.execute(
+            'SELECT factor1, factor2 FROM exercise_history WHERE user_id = ? AND nivel = ? AND cycle = ? ORDER BY created_at DESC, exercicio_id DESC',
+            [req.user.id, level, cycle]
+        );
+        const seen = new Set(history.map(item => `${item.factor1}:${item.factor2}`));
+        const all = exercisesForLevel(level);
+        let available = all.filter(item => !seen.has(`${item.factor1}:${item.factor2}`));
+        if (!available.length) {
+            cycle++;
+            const last = history[0];
+            available = all.filter(item => item.factor1 !== last.factor1 || item.factor2 !== last.factor2);
+        }
+        exercise = available[Math.floor(Math.random() * available.length)];
+        const operation = ['adicao', 'subtracao', 'multiplicacao', 'divisao'][level - 1];
+        await connection.execute(
+            'INSERT INTO exercicios (id, tipo, nivel, pergunta, resposta_correta, pontos, created_at) VALUES (?, ?, ?, ?, ?, 10, UTC_TIMESTAMP(3))',
+            [exercicioId, operation, level, `${exercise.factor1} ${exercise.operation.symbol} ${exercise.factor2}`, exercise.correctAnswer]
+        );
+        await connection.execute(
+            'INSERT INTO exercise_history (exercicio_id, user_id, nivel, cycle, factor1, factor2, created_at) VALUES (?, ?, ?, ?, ?, ?, UTC_TIMESTAMP(6))',
+            [exercicioId, req.user.id, level, cycle, exercise.factor1, exercise.factor2]
+        );
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+    res.json({ ...exercise, exercicioId });
+}));
+
+// Mantém sessões abertas com a versão anterior até que a página seja atualizada.
 app.post('/api/log-exercise', requireSession, wrap(async (req, res) => {
     const { level, operation, factor1, factor2, correctAnswer } = req.body || {};
     const symbols = { adicao: '+', subtracao: '−', multiplicacao: '×', divisao: '÷' };

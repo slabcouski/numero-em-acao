@@ -2,7 +2,7 @@
 // SISTEMA DE JOGO MATEMÁTICO - NUMERO EM AÇÃO
 // ============================================
 
-import { OPERATIONS, generateExercise, numberFromRotation, operationFromRotation, calculate, matchesExercise } from './exercises.js';
+import { OPERATIONS, numberFromRotation, operationFromRotation, calculate, matchesExercise } from './exercises.js';
 
 // --- CONFIGURAÇÃO E ESTADO DO JOGO ---
 const EXERCISES_PER_CHAPTER = 5;
@@ -16,7 +16,8 @@ let gameState = {
     currentExercise: null,  // Dados do exercício atual
     userAnswer: null,   // Resposta do usuário via anéis
     consecutiveCorrect: 0,
-    advancing: false
+    advancing: false,
+    loadingExercise: false
 };
 
 // Rotações dos anéis interativos
@@ -138,37 +139,29 @@ function updateUI() {
     resetRings();
 }
 
-// Registrar exercício no servidor e iniciar cronômetro
-function logExerciseIfPossible() {
-    const exercise = gameState.currentExercise;
-    exercise.startTime = Date.now();
-    exercise.registration = registerExercise(exercise, gameState.level);
-    return exercise.registration;
-}
-
-async function registerExercise(exercise, level) {
+async function loadExercise() {
+    gameState.loadingExercise = true;
+    gameState.currentExercise = null;
+    gameState.userAnswer = null;
+    document.getElementById('factor-a').textContent = '?';
+    document.getElementById('factor-b').textContent = '?';
+    document.getElementById('result-display').textContent = '?';
     try {
-        const opMap = { 1: 'adicao', 2: 'subtracao', 3: 'multiplicacao', 4: 'divisao' };
-        const body = {
-            level,
-            operation: opMap[level],
-            factor1: exercise.factor1,
-            factor2: exercise.factor2,
-            correctAnswer: exercise.correctAnswer
-        };
-        const resp = await fetch('/api/log-exercise', {
+        const resp = await fetch('/api/new-exercise', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ level: gameState.level })
         });
-        if (resp.ok) {
-            const data = await resp.json();
-            exercise.exercicioId = data.exercicioId || null;
-        } else {
-            console.error('Falha ao registrar exercício:', resp.status);
-        }
-    } catch(e) {
-        console.error('Erro ao registrar exercício:', e);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const exercise = await resp.json();
+        exercise.startTime = Date.now();
+        gameState.currentExercise = exercise;
+        updateUI();
+    } catch (error) {
+        console.error('Erro ao carregar exercício:', error);
+        showToast('Não foi possível carregar a missão. Use "Tentar de novo".', 'error');
+    } finally {
+        gameState.loadingExercise = false;
     }
 }
 
@@ -231,7 +224,7 @@ function getCurrentOperation() {
 
 // --- VALIDAÇÃO E PROGRESSÃO ---
 function checkAnswer() {
-    if (gameState.advancing) return;
+    if (gameState.advancing || gameState.loadingExercise) return;
     if (!gameState.currentExercise) {
         showToast('Aguarde a missão carregar.', 'warning');
         return;
@@ -263,7 +256,6 @@ async function logAnswerIfPossible(isCorrect) {
     try {
         const userId = localStorage.getItem('userId');
         if (!userId) return;
-        await exercise.registration;
         const exercicioId = exercise.exercicioId;
         if (!exercicioId) return;
         const resp = await fetch('/api/log-answer', {
@@ -343,21 +335,13 @@ async function nextExercise() {
         }
     }
     
-    // Gerar novo exercício
-    gameState.currentExercise = generateExercise(gameState.level);
-    gameState.userAnswer = null;
-    
     await saveProgress();
-    updateUI();
-    await logExerciseIfPossible();
+    await loadExercise();
 }
 
-function resetExercise() {
-    if (gameState.advancing) return;
-    gameState.currentExercise = generateExercise(gameState.level);
-    gameState.userAnswer = null;
-    updateUI();
-    logExerciseIfPossible();
+async function resetExercise() {
+    if (gameState.advancing || gameState.loadingExercise) return;
+    await loadExercise();
 }
 
 // --- CONTROLE DOS ANÉIS ---
@@ -435,11 +419,8 @@ async function showGameComplete() {
     gameState.level = 1;
     gameState.chapter = 1;
     gameState.exercise = 1;
-    gameState.currentExercise = generateExercise(gameState.level);
-    gameState.userAnswer = null;
     await saveProgress();
-    updateUI();
-    await logExerciseIfPossible();
+    await loadExercise();
 }
 
 // --- FUNÇÃO DE LOGOUT ---
@@ -481,10 +462,8 @@ async function initGame() {
         return;
     }
     await loadProgress();
-    gameState.currentExercise = generateExercise(gameState.level);
-    updateUI();
     setupDragRotation();
-    await logExerciseIfPossible();
+    await loadExercise();
 }
 
 // --- ROTAÇÃO MANUAL POR ARRASTE (mouse/touch) ---
