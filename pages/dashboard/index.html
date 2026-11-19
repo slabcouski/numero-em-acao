@@ -345,6 +345,20 @@
             <p>Desenvolvido com carinho para aprendizado inclusivo.</p>
         </div>
     </footer>
+    <dialog id="game-complete-dialog" aria-labelledby="game-complete-title" aria-describedby="game-complete-message"
+        class="bg-white dark:bg-gray-800 rounded-3xl shadow-sticker border-4 border-toy-yellow text-center p-6">
+        <span class="material-icons-round text-toy-yellow text-5xl" aria-hidden="true">emoji_events</span>
+        <h2 id="game-complete-title" class="text-3xl font-black text-primary">Parabéns!</h2>
+        <p id="game-complete-message" class="text-lg font-bold text-gray-600 dark:text-gray-300 mt-2">
+            Você completou todos os níveis do jogo! Você é um mestre da matemática!
+        </p>
+        <form method="dialog" class="mt-4">
+            <button type="submit" autofocus
+                class="bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-lg py-4 px-6 shadow-sticker">
+                Continuar jogando
+            </button>
+        </form>
+    </dialog>
     <script type="module" src="../../src/js/dashboard.js"></script>
 </body>
 

@@ -415,11 +415,14 @@ function showLevelComplete() {
 }
 
 async function showGameComplete() {
-    showToast('🎓 Parabéns! Você completou todos os níveis do jogo! Você é um mestre da matemática!', 'success');
+    const dialog = document.getElementById('game-complete-dialog');
+    const dismissed = new Promise(resolve => dialog.addEventListener('close', resolve, { once: true }));
+    dialog.showModal();
     gameState.level = 1;
     gameState.chapter = 1;
     gameState.exercise = 1;
     await saveProgress();
+    await dismissed;
     await loadExercise();
 }
 

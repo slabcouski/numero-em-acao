@@ -26,6 +26,7 @@ A plataforma tem **4 níveis de dificuldade** que progridem automaticamente:
 4. **Divisão** - O nível mais desafiador
 
 Cada nível tem várias rodadas para praticar bastante antes de avançar.
+Ao concluir todos os níveis, o aluno recebe uma mensagem de parabéns e pode continuar jogando desde o início.
 
 ### ⭐ Sistema de Pontuação
 - Cada resposta correta ganha pontos
