@@ -22,12 +22,3 @@ export async function verifyPassword(password, stored) {
     const latin1 = await scrypt(Buffer.from(password, 'latin1'), parts[1], 64);
     return timingSafeEqual(latin1, expected);
 }
-
-export async function hashLegacyPassword(encoded) {
-    if (typeof encoded !== 'string' || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded) || !encoded) {
-        throw new Error('Formato de senha legada não suportado');
-    }
-    const salt = randomBytes(16).toString('hex');
-    const hash = await scrypt(Buffer.from(encoded, 'base64'), salt, 64);
-    return `legacy-scrypt$${salt}$${hash.toString('hex')}`;
-}

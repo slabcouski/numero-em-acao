@@ -1,12 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { scryptSync } from 'node:crypto';
 import { getPool } from '../src/api/database.js';
-import { hashLegacyPassword, hashPassword, verifyPassword } from '../src/api/password.js';
+import { hashPassword, verifyPassword } from '../src/api/password.js';
 import app from '../src/api/app.js';
 import { OAuth2Client } from 'google-auth-library';
 
+function legacyHash(password) {
+    const salt = '0123456789abcdef0123456789abcdef';
+    const hash = scryptSync(Buffer.from(password, 'latin1'), salt, 64);
+    return `legacy-scrypt$${salt}$${hash.toString('hex')}`;
+}
+
 test('preserva senhas antigas e armazena novas senhas com scrypt', async () => {
-    const legacy = await hashLegacyPassword(Buffer.from('café', 'latin1').toString('base64'));
+    const legacy = legacyHash('café');
     assert.equal(await verifyPassword('café', legacy), true);
     assert.equal(await verifyPassword('outra', legacy), false);
     assert.equal(await verifyPassword('cafe\u0301', legacy), false);
@@ -24,7 +31,7 @@ test('login cria sessão e progresso usa a identidade autenticada', async t => {
     delete process.env.MYSQL_CA_PATH;
     delete process.env.MYSQL_CA_PEM;
     const pool = getPool();
-    const hash = await hashLegacyPassword(Buffer.from('senha123').toString('base64'));
+    const hash = legacyHash('senha123');
     const user = { id: '550e8400-e29b-41d4-a716-446655440000', username: 'Teste', email: 'teste@example.test', password_hash: hash };
     let updated = false;
     let progressUser;

@@ -8,10 +8,10 @@
 
 ### 🎮 O Jogo
 A plataforma usa um sistema de anéis rotativos que funcionam como uma calculadora criativa:
-- Você gira três anéis para escolher os números da conta
-- Cada anel representa um número diferente (números de 1 a 12)
-- Após girar, você vê qual operação matemática deve fazer (somar, subtrair, multiplicar ou dividir)
-- Você então resolve mentalmente e marca a resposta correta girando outro anel
+- Gire os dois anéis numéricos e o anel de operações para alinhar a conta da missão com a seta
+- Confira o resultado calculado e confirme a resposta
+
+Os dois anéis numéricos vão de 1 a 12. Todos os números das missões respeitam esse limite; os resultados de soma e multiplicação podem ser maiores, pois são calculados a partir dos anéis. As divisões são sempre exatas.
 
 ### 📚 Estrutura de Aprendizado
 A plataforma tem **4 níveis de dificuldade** que progridem automaticamente:
@@ -46,7 +46,7 @@ Qualquer criança em fase de aprendizado das operações matemáticas básicas, 
 
 ---
 
-## Execução e migração
+## Execução
 
 O aplicativo usa funções Node.js na Vercel e um MySQL remoto. As credenciais do banco permanecem somente no servidor. Para executar localmente, copie `.env.example` para `.env.local`, preencha os valores, use `APP_URL=http://localhost:3000`, execute `npm install` e depois `npm start`. Para testar o Google localmente, autorize também `http://localhost:3000/api/auth/google/callback` no cliente OAuth.
 
@@ -54,13 +54,6 @@ O MySQL remoto deve permitir conexões da aplicação. Para TLS, configure `MYSQ
 
 Configure `APP_URL` com a origem pública da aplicação, sem caminho final. No cliente OAuth do Google, adicione `<APP_URL>/api/auth/google/callback` como URI de redirecionamento autorizada. Configure `APP_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e as variáveis `MYSQL_*` nas variáveis de ambiente da Vercel. Use uma URL estável para evitar quebrar o callback entre implantações.
 
-Para migrar uma instalação existente do Supabase:
-
-1. Faça backup e interrompa gravações na aplicação antiga até concluir a troca.
-2. Crie um banco MySQL vazio. Em `.env.local`, configure também `SUPABASE_URL` e uma `SUPABASE_SECRET_KEY` de uso exclusivo para a migração. Não publique essa chave nem a configure na Vercel.
-3. Execute `node scripts/migrate-to-mysql.js` para verificar acesso e contagens sem gravar. Execute com `--execute` para criar as tabelas e copiar os dados. O comando recusa um destino que já contenha tabelas.
-4. Configure e publique a nova aplicação, valide logins locais, Google e progresso, e somente então retome o uso. Se a migração for interrompida após criar as tabelas, examine o destino antes de uma nova tentativa: o comando não apaga tabelas existentes.
-
-As senhas locais antigas são convertidas para hashes scrypt durante a cópia; as identidades Google são vinculadas pelo identificador Google original, não pelo e-mail. As sessões anteriores ao corte não são migradas, portanto os usuários precisarão entrar novamente. Execute `npm test` para verificar os testes automatizados.
+Para uma instalação nova, crie um banco MySQL vazio e execute o esquema em `src/api/schema.sql`. Não execute esse esquema em um banco existente sem verificar seu conteúdo. Execute `npm test` para verificar os testes automatizados.
 
 **Aprenda matemática se divertindo com Número em Ação!** 🚀🎯

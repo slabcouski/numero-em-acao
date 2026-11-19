@@ -2,14 +2,9 @@
 // SISTEMA DE JOGO MATEMÁTICO - NUMERO EM AÇÃO
 // ============================================
 
-// --- CONFIGURAÇÃO E ESTADO DO JOGO ---
-const OPERATIONS = {
-    ADDITION: { symbol: '+', name: 'Adição', icon: 'add', level: 1 },
-    SUBTRACTION: { symbol: '−', name: 'Subtração', icon: 'remove', level: 2 },
-    MULTIPLICATION: { symbol: '×', name: 'Multiplicação', icon: 'close', level: 3 },
-    DIVISION: { symbol: '÷', name: 'Divisão', icon: 'division', level: 4 }
-};
+import { OPERATIONS, generateExercise, numberFromRotation, operationFromRotation, calculate, matchesExercise } from './exercises.js';
 
+// --- CONFIGURAÇÃO E ESTADO DO JOGO ---
 const EXERCISES_PER_CHAPTER = 5;
 const CHAPTERS_PER_LEVEL = 3;
 
@@ -20,7 +15,8 @@ let gameState = {
     score: 0,           // Pontuação total
     currentExercise: null,  // Dados do exercício atual
     userAnswer: null,   // Resposta do usuário via anéis
-    consecutiveCorrect: 0
+    consecutiveCorrect: 0,
+    advancing: false
 };
 
 // Rotações dos anéis interativos
@@ -97,63 +93,6 @@ async function loadProgress() {
     }
 }
 
-// --- GERAÇÃO DE EXERCÍCIOS ALEATÓRIOS ---
-function generateExercise(level) {
-    let factor1, factor2, correctAnswer, operation;
-    
-    // Números limitados a 1-12 (disponíveis nos círculos)
-    const MAX_NUMBER = 12;
-    
-    switch(level) {
-        case 1: // ADIÇÃO
-            operation = OPERATIONS.ADDITION;
-            // Garantir que ambos fatores estejam entre 1-12
-            factor1 = randomInt(1, MAX_NUMBER);
-            factor2 = randomInt(1, MAX_NUMBER);
-            correctAnswer = factor1 + factor2;
-            break;
-            
-        case 2: // SUBTRAÇÃO
-            operation = OPERATIONS.SUBTRACTION;
-            // Garantir que o resultado seja positivo e fatores <= 12
-            factor1 = randomInt(2, MAX_NUMBER);
-            factor2 = randomInt(1, factor1 - 1);
-            correctAnswer = factor1 - factor2;
-            break;
-            
-        case 3: // MULTIPLICAÇÃO
-            operation = OPERATIONS.MULTIPLICATION;
-            // Limitar para que o resultado não seja muito grande
-            factor1 = randomInt(1, MAX_NUMBER);
-            factor2 = randomInt(1, MAX_NUMBER);
-            correctAnswer = factor1 * factor2;
-            break;
-            
-        case 4: // DIVISÃO
-            operation = OPERATIONS.DIVISION;
-            // Gerar divisões exatas com fatores <= 12
-            factor2 = randomInt(2, MAX_NUMBER);
-            const quotient = randomInt(1, MAX_NUMBER);
-            factor1 = factor2 * quotient;
-            correctAnswer = quotient;
-            break;
-    }
-    
-    return {
-        factor1,
-        factor2,
-        correctAnswer,
-        operation,
-        userAnswer: null,
-        exercicioId: null,
-        startTime: null
-    };
-}
-
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 // --- ATUALIZAÇÃO DA INTERFACE ---
 function updateUI() {
     // Atualizar operação e fatores
@@ -203,15 +142,22 @@ function updateUI() {
 }
 
 // Registrar exercício no servidor e iniciar cronômetro
-async function logExerciseIfPossible() {
+function logExerciseIfPossible() {
+    const exercise = gameState.currentExercise;
+    exercise.startTime = Date.now();
+    exercise.registration = registerExercise(exercise, gameState.level);
+    return exercise.registration;
+}
+
+async function registerExercise(exercise, level) {
     try {
         const opMap = { 1: 'adicao', 2: 'subtracao', 3: 'multiplicacao', 4: 'divisao' };
         const body = {
-            level: gameState.level,
-            operation: opMap[gameState.level] || 'adicao',
-            factor1: gameState.currentExercise.factor1,
-            factor2: gameState.currentExercise.factor2,
-            correctAnswer: gameState.currentExercise.correctAnswer
+            level,
+            operation: opMap[level],
+            factor1: exercise.factor1,
+            factor2: exercise.factor2,
+            correctAnswer: exercise.correctAnswer
         };
         const resp = await fetch('/api/log-exercise', {
             method: 'POST',
@@ -220,14 +166,12 @@ async function logExerciseIfPossible() {
         });
         if (resp.ok) {
             const data = await resp.json();
-            gameState.currentExercise.exercicioId = data.exercicioId || null;
+            exercise.exercicioId = data.exercicioId || null;
         } else {
             console.error('Falha ao registrar exercício:', resp.status);
         }
     } catch(e) {
         console.error('Erro ao registrar exercício:', e);
-    } finally {
-        gameState.currentExercise.startTime = Date.now();
     }
 }
 
@@ -256,8 +200,8 @@ function rotateMiddleRingToOperation(operation) {
     const operationAngles = {
         'close': 0,      // × no topo
         'add': 180,      // + embaixo
-        'remove': 270,   // − esquerda
-        'division': 90   // ÷ direita
+        'remove': 90,    // − esquerda
+        'division': 270  // ÷ direita
     };
     
     const targetAngle = operationAngles[operation.icon] || 0;
@@ -273,18 +217,12 @@ function updateCalculationDisplay() {
     const factor2 = getNumberFromRing('ring-inner');
     const operationSymbol = getCurrentOperationFromRing();
     
-    let result = 0;
-    switch(operationSymbol) {
-        case '+': result = factor1 + factor2; break;
-        case '−': result = factor1 - factor2; break;
-        case '×': result = factor1 * factor2; break;
-        case '÷': result = factor2 !== 0 ? Math.floor(factor1 / factor2) : 0; break;
-    }
+    const result = calculate(factor1, factor2, operationSymbol);
     
     gameState.userAnswer = result;
     
     const resultDisplay = document.getElementById('result-display');
-    resultDisplay.textContent = result;
+    resultDisplay.textContent = result === null ? '?' : result;
     
     // Animação de bounce
     resultDisplay.classList.remove('scale-100');
@@ -298,34 +236,11 @@ function updateCalculationDisplay() {
 }
 
 function getNumberFromRing(ringId) {
-    const ring = document.getElementById(ringId);
-    const rotation = rotations[ringId] || 0;
-    // Normalizar rotação (0-360)
-    const normalized = ((rotation % 360) + 360) % 360;
-    // Cada número está a 30° de distância
-    // Quando roda gira no sentido horário, os números DIMINUEM
-    // 0°=12, 30°=11, 60°=10, 90°=9, 120°=8, 150°=7, 180°=6, 210°=5, 240°=4, 270°=3, 300°=2, 330°=1
-    const steps = Math.round(normalized / 30);
-    let number = 12 - steps;
-    if (number <= 0) number += 12;
-    return number;
+    return numberFromRotation(rotations[ringId] || 0);
 }
 
 function getCurrentOperationFromRing() {
-    const ring = document.getElementById('ring-middle');
-    const rotation = rotations['ring-middle'] || 0;
-    const normalized = ((rotation % 360) + 360) % 360;
-    
-    // Mapear ângulo para operação (considerando que ícones estão a 90° cada)
-    // 0°: ×, 90°: ÷, 180°: +, 270°: −
-    const angle = Math.round(normalized / 90) * 90;
-    switch(angle) {
-        case 0: return '×';
-        case 90: return '÷';
-        case 180: return '+';
-        case 270: return '−';
-        default: return '+';
-    }
+    return operationFromRotation(rotations['ring-middle'] || 0);
 }
 
 function getCurrentOperation() {
@@ -334,37 +249,48 @@ function getCurrentOperation() {
 
 // --- VALIDAÇÃO E PROGRESSÃO ---
 function checkAnswer() {
-    if (!gameState.currentExercise || gameState.userAnswer === null) {
-        showToast('Configure os anéis primeiro!', 'warning');
+    if (gameState.advancing) return;
+    if (!gameState.currentExercise) {
+        showToast('Aguarde a missão carregar.', 'warning');
+        return;
+    }
+    if (gameState.userAnswer === null) {
+        showToast('Escolha uma divisão exata nos anéis!', 'warning');
         return;
     }
     
-    const isCorrect = gameState.userAnswer === gameState.currentExercise.correctAnswer;
+    const exercise = gameState.currentExercise;
+    const isCorrect = matchesExercise(exercise, getNumberFromRing('ring-outer'),
+        getNumberFromRing('ring-inner'), getCurrentOperationFromRing()) &&
+        gameState.userAnswer === exercise.correctAnswer;
     // Registrar resposta no backend (se possível)
     logAnswerIfPossible(isCorrect);
     
     if (isCorrect) {
         handleCorrectAnswer();
     } else {
-        handleWrongAnswer();
+        handleWrongAnswer(gameState.userAnswer === exercise.correctAnswer);
     }
 }
 
 async function logAnswerIfPossible(isCorrect) {
+    const exercise = gameState.currentExercise;
+    const respostaUsuario = gameState.userAnswer;
+    const tempo = exercise.startTime ? Date.now() - exercise.startTime : null;
+    const pontos = isCorrect ? 10 * gameState.level : 0;
     try {
         const userId = localStorage.getItem('userId');
         if (!userId) return;
-        const exercicioId = gameState.currentExercise?.exercicioId;
+        await exercise.registration;
+        const exercicioId = exercise.exercicioId;
         if (!exercicioId) return;
-        const tempo = gameState.currentExercise?.startTime ? (Date.now() - gameState.currentExercise.startTime) : null;
-        const pontos = isCorrect ? (10 * gameState.level) : 0;
         const resp = await fetch('/api/log-answer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userId,
                 exercicioId,
-                respostaUsuario: gameState.userAnswer,
+                respostaUsuario,
                 estaCorreto: !!isCorrect,
                 pontosGanhos: pontos,
                 tempoResposta: tempo
@@ -380,6 +306,7 @@ async function logAnswerIfPossible(isCorrect) {
 }
 
 function handleCorrectAnswer() {
+    gameState.advancing = true;
     gameState.score += 10 * gameState.level;
     gameState.consecutiveCorrect++;
     
@@ -387,16 +314,25 @@ function handleCorrectAnswer() {
     playSuccessAnimation();
     
     // Avançar para próximo exercício
-    setTimeout(() => {
-        nextExercise();
+    setTimeout(async () => {
+        try {
+            await nextExercise();
+        } catch (error) {
+            console.error('Erro ao avançar exercício:', error);
+            showToast('Não foi possível avançar. Tente novamente.', 'error');
+        } finally {
+            gameState.advancing = false;
+        }
     }, 1500);
 }
 
-function handleWrongAnswer() {
+function handleWrongAnswer(sameResult) {
     gameState.consecutiveCorrect = 0;
     const correctAnswer = gameState.currentExercise.correctAnswer;
     
-    showToast(`Ops! A resposta correta é ${correctAnswer}. Tente novamente! 💪`, 'error');
+    showToast(sameResult
+        ? 'Ajuste os números e a operação dos anéis para corresponder à missão.'
+        : `Ops! A resposta correta é ${correctAnswer}. Tente novamente! 💪`, 'error');
     playErrorAnimation();
 }
 
@@ -415,7 +351,7 @@ async function nextExercise() {
             
             // Verificar se completou todos os níveis
             if (gameState.level > 4) {
-                showGameComplete();
+                await showGameComplete();
                 return;
             } else {
                 showLevelComplete();
@@ -435,9 +371,11 @@ async function nextExercise() {
 }
 
 function resetExercise() {
+    if (gameState.advancing) return;
     gameState.currentExercise = generateExercise(gameState.level);
     gameState.userAnswer = null;
     updateUI();
+    logExerciseIfPossible();
 }
 
 // --- CONTROLE DOS ANÉIS ---
@@ -517,7 +455,11 @@ async function showGameComplete() {
     gameState.level = 1;
     gameState.chapter = 1;
     gameState.exercise = 1;
+    gameState.currentExercise = generateExercise(gameState.level);
+    gameState.userAnswer = null;
     await saveProgress();
+    updateUI();
+    await logExerciseIfPossible();
 }
 
 // --- FUNÇÃO DE LOGOUT ---
