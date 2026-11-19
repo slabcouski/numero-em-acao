@@ -134,10 +134,7 @@ function updateUI() {
     // Limpar resposta anterior
     document.getElementById('result-display').textContent = '?';
     
-    // Atualizar anel do meio com operação correta
-    rotateMiddleRingToOperation(operation);
-    
-    // Resetar anéis
+    // Resetar anéis numéricos, preservando a operação escolhida
     resetRings();
 }
 
@@ -192,21 +189,6 @@ function updatePageNumber() {
     if (pageElementRight) {
         pageElementRight.textContent = `Página ${pageNumber}`;
     }
-}
-
-function rotateMiddleRingToOperation(operation) {
-    const ringMiddle = document.getElementById('ring-middle');
-    // Rotacionar o anel do meio para mostrar a operação correta no topo
-    const operationAngles = {
-        'close': 0,      // × no topo
-        'add': 180,      // + embaixo
-        'remove': 90,    // − esquerda
-        'division': 270  // ÷ direita
-    };
-    
-    const targetAngle = operationAngles[operation.icon] || 0;
-    rotations['ring-middle'] = targetAngle;
-    ringMiddle.style.transform = `rotate(${targetAngle}deg)`;
 }
 
 function updateCalculationDisplay() {
@@ -388,8 +370,6 @@ function rotateRing(id) {
 }
 
 function resetRings() {
-    // Posicionar anéis na resposta correta (para demonstração inicial)
-    // Mas sem revelar a resposta
     rotations['ring-outer'] = 0;
     rotations['ring-inner'] = 0;
     

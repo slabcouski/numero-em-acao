@@ -1,8 +1,8 @@
 export const OPERATIONS = {
-    ADDITION: { symbol: '+', name: 'Adição', icon: 'add', level: 1 },
-    SUBTRACTION: { symbol: '−', name: 'Subtração', icon: 'remove', level: 2 },
-    MULTIPLICATION: { symbol: '×', name: 'Multiplicação', icon: 'close', level: 3 },
-    DIVISION: { symbol: '÷', name: 'Divisão', icon: 'division', level: 4 }
+    ADDITION: { symbol: '+', name: 'Adição', level: 1 },
+    SUBTRACTION: { symbol: '−', name: 'Subtração', level: 2 },
+    MULTIPLICATION: { symbol: '×', name: 'Multiplicação', level: 3 },
+    DIVISION: { symbol: '÷', name: 'Divisão', level: 4 }
 };
 
 const MAX_NUMBER = 12;

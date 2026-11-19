@@ -11,6 +11,8 @@ A plataforma usa um sistema de anéis rotativos que funcionam como uma calculado
 - Gire os dois anéis numéricos e o anel de operações para alinhar a conta da missão com a seta
 - Confira o resultado calculado e confirme a resposta
 
+O anel de operações permanece na posição escolhida pelo aluno ao trocar de exercício ou nível; gire-o quando for necessário mudar a operação.
+
 Os dois anéis numéricos vão de 1 a 12. Todos os números das missões respeitam esse limite; os resultados de soma e multiplicação podem ser maiores, pois são calculados a partir dos anéis. As divisões são sempre exatas.
 
 ### 📚 Estrutura de Aprendizado
